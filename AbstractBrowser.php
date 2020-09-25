@@ -43,6 +43,7 @@ abstract class AbstractBrowser
     protected $followMetaRefresh = false;
 
     private $maxRedirects = -1;
+    private $disableUrlEncode = 0;
     private $redirectCount = 0;
     private $redirects = [];
     private $isMainRequest = true;
@@ -90,6 +91,13 @@ abstract class AbstractBrowser
     {
         $this->maxRedirects = $maxRedirects < 0 ? -1 : $maxRedirects;
         $this->followRedirects = -1 != $this->maxRedirects;
+    }
+
+    /**
+     * Set URL encoding before executing the request.
+     */
+    public function disableUrlEncode(bool $disableUrlEncode = false){
+        $this->disableUrlEncode = $disableUrlEncode;
     }
 
     /**
@@ -366,6 +374,10 @@ abstract class AbstractBrowser
 
         if (empty($server['HTTP_HOST'])) {
             $server['HTTP_HOST'] = $this->extractHost($uri);
+        }
+
+        if ($this->disableUrlEncode) {
+            $uri = rawurldecode(rawurldecode($uri));
         }
 
         $server['HTTPS'] = 'https' == parse_url($uri, \PHP_URL_SCHEME);
